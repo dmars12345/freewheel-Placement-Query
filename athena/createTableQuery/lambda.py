@@ -12,7 +12,7 @@ def lambda_handler(event,context):
 
     queryData = json.loads(s3_resource.Object('placement-query-bucket','tableQuery.json').get()['Body'].read().decode('utf-8'))
     QueryStart = athena_client.start_query_execution(QueryString = queryData['query'] ,QueryExecutionContext = {'Database': queryData['database']},WorkGroup = queryData['workgroup'])
-    functionPayload =  {'tableQueryId' : QueryStart['QueryExecutionId'],'bucketKey' : 'athena/'}
+    functionPayload =  json.dumps({'tableQueryId' : QueryStart['QueryExecutionId'],'bucketKey' : 'athena/'})
     invokeFunction = lambda_client.invoke(FunctionName= queryData['dataArn'] , InvocationType='RequestResponse',Payload= functionPayload)
 
     return {'time' : json.dumps(datetime.now()), 'queryId': QueryStart['QueryExecutionId']}
